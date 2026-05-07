@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -8,6 +9,47 @@ async function bootstrap() {
   // ╔══════════════════════════════════════════════════════════════╗
   // ║           🎮 GAMING PLATFORM - SWAGGER SOZLAMALARI           ║
   // ╚══════════════════════════════════════════════════════════════╝
+  app.enableCors({
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        /^http:\/\/localhost(:\d+)?$/,
+        /^https:\/\/.*\.vercel\.app$/,
+        /^https:\/\/.*\.railway\.app$/,
+      ];
+      if (!origin || allowedOrigins.some((regex) => regex.test(origin))) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+    allowedHeaders: [
+      'Content-Type',
+      'Accept',
+      'Authorization',
+      'X-Requested-With',
+      'X-HTTP-Method-Override',
+      'x-auth-token',
+    ],
+    exposedHeaders: ['Set-Cookie', 'x-auth-token'],
+    optionsSuccessStatus: 204,
+  });
+
+  app.use((req, res, next) => {
+    console.log(
+      `[Request] Method: ${req.method}, Path: ${req.path}, Body: ${JSON.stringify(req.body)}`,
+    );
+    next();
+  });
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
+
   const config = new DocumentBuilder()
     .setTitle('🎮 Gaming Platform API')
     .setDescription(
@@ -24,8 +66,10 @@ Barcha rollar uchun statistika va shaxsiy kabinet apilari qo'shildi.
 | Bo'lim | Maqsad | Kimlar uchun? |
 |--------|--------|---------------|
 | 🔓 **Auth** | Ro'yxatdan o'tish va tizimga kirish | Hammasi |
-| 🛡️ **Admin: Users** | Foydalanuvchilarni boshqarish | Faqat Admin |
+| 🛡️ **Admin: Users** | Foydalanuvchlarni boshqarish | Faqat Admin |
 | 🎮 **Games** | O'yinlarni ko'rish va boshqarish | Hammasi / Seller |
+| 📂 **Categories** | O'yin kategoriyalari | Hammasi / Admin |
+| 🛒 **Orders** | Sotib olish va buyurtmalar | Hammasi |
 | 📊 **Dashboard & Stats** | Admin va Seller uchun statistika | Admin / Seller |
 | 👤 **User Cabinet** | Shaxsiy profil va sotib olingan o'yinlar | Hammasi |
 
@@ -54,7 +98,7 @@ Barcha rollar uchun statistika va shaxsiy kabinet apilari qo'shildi.
         scheme: 'bearer',
         bearerFormat: 'JWT',
         name: 'Authorization',
-        description: "Tokenni kiriting",
+        description: 'Tokenni kiriting',
         in: 'header',
       },
       'access-token',
@@ -62,6 +106,8 @@ Barcha rollar uchun statistika va shaxsiy kabinet apilari qo'shildi.
     .addTag('🔓 Auth', "Ro'yxatdan o'tish")
     .addTag('🛡️ Admin: Foydalanuvchilar boshqaruvi', 'Admin CRUD')
     .addTag('🎮 O\'yinlar (Games)', 'O\'yinlar ro\'yxati')
+    .addTag('📂 Kategoriyalar (Categories)', 'Kategoriyalar boshqaruvi')
+    .addTag('🛒 Buyurtmalar (Orders)', 'O\'yin sotib olish')
     .addTag('📊 Dashboard & Statistika', 'Admin va Seller statistikasi')
     .addTag('👤 User Cabinet: Shaxsiy profil', 'Foydalanuvchi sozlamalari va o\'yinlari')
     .build();
@@ -76,9 +122,9 @@ Barcha rollar uchun statistika va shaxsiy kabinet apilari qo'shildi.
     },
   });
 
-  app.enableCors();
-
-  await app.listen(3000);
-  console.log('🚀 Dastur ishga tushdi: http://localhost:3000');
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  console.log(`🚀 Dastur ishga tushdi: http://localhost:${port}`);
+  console.log(`📑 Swagger docs: http://localhost:${port}/api/docs`);
 }
 bootstrap();

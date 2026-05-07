@@ -34,17 +34,17 @@ export class GamesController {
     summary: 'Barcha o\'yinlarni olish (Filter bilan)',
     description: 'Xaridorlar va barcha foydalanuvchilar uchun o\'yinlar ro\'yxati.',
   })
-  @ApiQuery({ name: 'genre', required: false, description: 'Janr bo\'yicha filter (Action, RPG, etc.)' })
+  @ApiQuery({ name: 'categoryId', required: false, description: 'Kategoriya ID si bo\'yicha filter' })
   @ApiQuery({ name: 'search', required: false, description: 'Nom bo\'yicha qidirish' })
   @ApiQuery({ name: 'minPrice', required: false, type: Number })
   @ApiQuery({ name: 'maxPrice', required: false, type: Number })
   findAll(
-    @Query('genre') genre?: string,
+    @Query('categoryId') categoryId?: string,
     @Query('search') search?: string,
     @Query('minPrice') minPrice?: number,
     @Query('maxPrice') maxPrice?: number,
   ) {
-    return this.gamesService.findAll({ genre, search, minPrice, maxPrice });
+    return this.gamesService.findAll({ categoryId, search, minPrice, maxPrice });
   }
 
   @Get(':id')
@@ -65,7 +65,7 @@ export class GamesController {
         title: { type: 'string', example: 'Cyberpunk 2077' },
         description: { type: 'string', example: 'Futuristik ochiq dunyo o\'yini' },
         price: { type: 'number', example: 59.99 },
-        genre: { type: 'string', example: 'RPG' },
+        categoryId: { type: 'string', example: '65f1... (Category ObjectId)' },
         imageUrl: { type: 'string', example: 'https://image.com/game.jpg' },
       },
     },

@@ -9,11 +9,11 @@ export class GamesService {
   constructor(@InjectModel(Game.name) private gameModel: Model<Game>) {}
 
   // O'yinlar ro'yxatini olish (Filter bilan)
-  async findAll(query: { genre?: string; search?: string; minPrice?: number; maxPrice?: number }) {
+  async findAll(query: { categoryId?: string; search?: string; minPrice?: number; maxPrice?: number }) {
     const filter: any = { isActive: true };
 
-    if (query.genre) {
-      filter.genre = query.genre;
+    if (query.categoryId) {
+      filter.categoryId = query.categoryId;
     }
 
     if (query.search) {
@@ -26,12 +26,21 @@ export class GamesService {
       if (query.maxPrice) filter.price.$lte = query.maxPrice;
     }
 
-    return this.gameModel.find(filter).populate('sellerId', 'fullName email').sort({ createdAt: -1 }).exec();
+    return this.gameModel
+      .find(filter)
+      .populate('sellerId', 'fullName email')
+      .populate('categoryId', 'name')
+      .sort({ createdAt: -1 })
+      .exec();
   }
 
   // Bitta o'yinni ID orqali olish
   async findOne(id: string) {
-    const game = await this.gameModel.findById(id).populate('sellerId', 'fullName email').exec();
+    const game = await this.gameModel
+      .findById(id)
+      .populate('sellerId', 'fullName email')
+      .populate('categoryId', 'name')
+      .exec();
     if (!game) {
       throw new NotFoundException('O\'yin topilmadi');
     }

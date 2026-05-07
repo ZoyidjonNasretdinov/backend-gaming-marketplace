@@ -12,8 +12,8 @@ export class Game extends Document {
   @Prop({ required: true })
   price: number;
 
-  @Prop({ required: true })
-  genre: string;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Category', required: true })
+  categoryId: string;
 
   @Prop({ required: true })
   imageUrl: string;
